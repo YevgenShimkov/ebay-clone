@@ -1,70 +1,87 @@
 'use client'
 
 import Link from "next/link";
-import { BsChevronDown } from "react-icons/bs";
-import { AiOutlineShoppingCart } from "react-icons/ai";
+import { AiOutlineSearch } from "react-icons/ai";
+import Image from "next/image";
+import { useState } from "react";
+import debounce from "debounce";
+import { BiLoaderCircle } from "react-icons/bi";
 
-const TopMenu = () => {
+const MainMenu = () => {
+  const [items, setItems] = useState([])
+  const [isSearching, setIsSearching] = useState(null)
+  
+  const handleSearchName = debounce(async (event) => {
+    if (event.target.value === '') {
+      setItems([])
+      return
+    }
+    setIsSearching(true)
+    
+    try {
+      const response = await fetch(`/api/products/search-by-name/${event.target.value}`)
+      const result = await response.json()
+      
+      if (result) {
+        setItems(result)
+        setIsSearching(false)
+        return
+      }
+      
+      setItems([])
+      setIsSearching(false)
+    } catch (error) {
+      console.log(error)
+      alert(error)
+    }
+  }, 500)
+  
   return (
-    <div id="TopMenu" className="border-b">
-      <div className="flex items-center justify-between w-full mx-auto max-w-[1200px]">
-        <ul
-          id='TopMenuLeft'
-          className='flex items-center text-[11px] text-[#333333] px-2 h-8'>
-          <li className='relative px-3'>
-            <Link href='/auth' className='flex items-center gap-2 hover:underline cursor-pointer'>
-              <div>Login</div>
-              <BsChevronDown/>
-            </Link>
-            <div
-              id='AuthDropdown'
-              className='hidden absolute bg-white w-[200px] text-[#333333] z-40 top-[20px] left-0 border shadow-lg'>
-              <div className='flex items-center justify-start gap-1 p-3'>
-                <img width={50} src="https://picsum.photos/200" alt='avatar'/>
-                <div className='font-bold text-[13px]'>John Weeks</div>
-                <div className='border-b'/>
-                <ul className='bg-white'>
-                  <li
-                    className='text-[11px] py-2 px-4 w-full hover:underline text-blue-500 hover:text-blue-600 cursor-pointer'>
-                    <Link href='/orders'>
-                      My Orders
+    <div id="MainHeader" className="flex items-center justify-between w-full mx-auto max-w-[1200px]">
+      <div className="flex lg:justify-start justify-between gap-10 max-w-[115-px] w-full px-3 py-5 mx-auto">
+        <Link href='/'>
+          <Image src='/images/logo.svg' alt='logo' width={120} height={120}/>
+        </Link>
+        <div className="w-full flex items-center">
+          <div className='relative flex items-center border-2 border-gray-900 w-full p-2'>
+            <button className='flex items-center'>
+              <AiOutlineSearch size={22}/>
+            </button>
+            <input
+              onChange={handleSearchName}
+              className='w-full placeholder-gray-400 text-sm pl-3 focus:outline-none'
+              placeholder='Seatch for anything' type="text"
+            />
+            {isSearching && <BiLoaderCircle className="mr-2 animate-spin" size={22}/>}
+            
+            {items.length > 0 &&
+              <div className="absolute bg-white max-w-[910px] h-auto w-full z-20 left-0 top-12 border p-1">
+                {items.map(item => (
+                  <div className="p-1" key={item.id}>
+                    <Link
+                      href={`/product/${item?.id}`}
+                      className="flex items-center justify-between w-full cursor-pointer hover:bg-gray-200 p-1 px-2"
+                    >
+                      <div className="flex items-center">
+                        <img className="rounded-md" width="40" src={item?.url + '/40 '}/>
+                        <div className="truncate ml-2">{item?.title}</div>
+                      </div>
+                      <div className="truncate">${(item?.price / 100).toFixed(2)}</div>
                     </Link>
-                  </li>
-                  <li
-                    className='text-[11px] py-2 px-4 w-full hover:underline text-blue-500 hover:text-blue-600 cursor-pointer'>
-                    Sign out
-                  </li>
-                </ul>
+                  </div>
+                ))}
               </div>
-            </div>
-          </li>
-          <li className='px-3 hover:underline cursor-pointer'>
-            Daily Deals
-          </li>
-          <li className='px-3 hover:underline cursor-pointer'>
-            Help & Contact
-          </li>
-        </ul>
-        <ul
-          id="TopMenuRight"
-          className='flex items-center text-[11px] text-[#333333] px-2 h-8'
-        >
-          <li className='flex items-center gap-2 px-3 hover:underline cursor-pointer'>
-            <img width={32} src='/images/uk.png' alt='flag'/>
-            Ship to
-          </li>
-          <li className='px-3 hover:underline cursor-pointer relative'>
-              <AiOutlineShoppingCart size={22}/>
-              <div
-                className='absolute flex justify-center text-[10px] -top-0.5 right-2 bg-red-500 w-3.5 h-3.5 rounded-full text-white'>
-                3
-              </div>
-          </li>
-        </ul>
+            }
+          </div>
+          <button className='flex items-center bg-blue-600 text-sm font-semibold text-white p-[11px] ml-2 px-14'>
+            Search
+          </button>
+          <div className='text-xs px-2 hover:text-blue-500 cursor-pointer'>Advanced</div>
+        </div>
       </div>
     </div>
   )
 }
 
-export default TopMenu;
+export default MainMenu;
 

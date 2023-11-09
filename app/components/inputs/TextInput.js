@@ -1,28 +1,32 @@
 "use client"
 
-import Link from "next/link";
-
-const ProductItem = ({ product }) => {
+const TextInput = ({ string, placeholder, error, onUpdate }) => {
   return (
-    <div>
-      <Link href={`/product/${product.id}`}
-            className="max-w-[200px] p-1.5 border border-gray-50 hover:border-gray-200 hover:shadow-xl bg-gray-100 rounded mx-auto"
-      >
-        {product?.url && <img className="rounded cursor-pointer" src={product.url + '/190'} alt="product img"/>}
-        <div className="pt-2 px-1">
-          <div className="font-semibold text-[15px] hover:underline cursor-pointer">{product?.title}</div>
-          <div className="font-extrabold">${(product?.price / 100).toFixed(2)}</div>
-          
-          <div className="flex items-center text-[12px] text-gray-500">
-            <div className="line-through">${((product?.price *1.2)/100).toFixed(2)}</div>
-            <div className="px-2">-</div>
-            <div className="line-through">20%</div>
-          </div>
-        </div>
-      </Link>
-    </div>
-  )
+    <>
+      <input
+        placeholder={placeholder}
+        className="
+          w-full
+          bg-white
+          text-gray-800
+          border
+          text-sm
+          border-[#272727]
+          p-3
+          placeholder-gray-500
+          focus:outline-none
+      "
+        value={string || ''}
+        onChange={event => onUpdate(event.target.value)}
+        type="text"
+        autoComplete="off"
+      />
+      
+      {error && <div className="text-red-500 text-[14px] font-semibold">
+        {error}
+      </div>}
+    </>)
 }
 
-export default ProductItem;
+export default TextInput;
 

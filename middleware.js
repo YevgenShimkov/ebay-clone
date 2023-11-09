@@ -7,7 +7,6 @@ export async function middleware(req) {
   const supabase = createMiddlewareClient({ req, res })
   const { data } = await supabase.auth.getSession()
   
-  console.log(data)
   // if we already login, we redirect from auth page
   if (data?.session && req.nextUrl.pathname.startsWith('/auth')) {
     return NextResponse.redirect(new URL('/', req.url))

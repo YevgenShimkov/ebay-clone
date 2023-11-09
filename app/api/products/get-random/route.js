@@ -1,23 +1,21 @@
 import prisma from "@/app/libs/Prisma";
 import { NextResponse } from "next/server";
 
-
+//todo simplify this like address/id/route
 export async function GET(req, context) {
   
   try {
-    const { name } = context.params
-    const items = await prisma.products.findMany({
+    const productsCount = await prisma.products.count();
+    const skip = Math.floor(Math.random() * productsCount);
+    
+    const products = await prisma.products.findMany({
       take: 5,
-      where: {
-        title: {
-          contains: name,
-          mode: 'insensitive',
-        }
-      }
+      skip: skip,
+      orderBy: { id: 'asc' },
     })
     
     await prisma.$disconnect();
-    return NextResponse.json(items)
+    return NextResponse.json(products);
     
   } catch (error) {
     console.log(error)
